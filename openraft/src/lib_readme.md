@@ -30,6 +30,7 @@ Openraft supports several feature flags to customize functionality:
 
 **Serialization**:
 - `serde` - Add `serde::Serialize` and `serde::Deserialize` bounds to data types
+- `rkyv` - Add `rkyv::Archive`, `rkyv::Serialize`, and `rkyv::Deserialize` bounds to data types
 
 **Error handling**:
 - `bt` - Enable error backtraces (requires nightly Rust)
@@ -40,4 +41,3 @@ Openraft supports several feature flags to customize functionality:
 **Compatibility**:
 - `compat` - Provide basic compatible types for upgrades
 - `type-alias` - Enable `openraft::alias::*` type shortcuts (unstable)
-

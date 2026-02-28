@@ -4,6 +4,7 @@ use crate::errors::Operation;
 /// Error indicating a node was not found in the cluster.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 #[error("Node {node_id} not found when: ({operation})")]
 pub struct NodeNotFound<C: RaftTypeConfig> {
     /// The node ID that was not found.

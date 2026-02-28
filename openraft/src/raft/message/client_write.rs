@@ -18,6 +18,7 @@ pub type ClientWriteResult<C> = Result<ClientWriteResponse<C>, ClientWriteError<
     derive(serde::Deserialize, serde::Serialize),
     serde(bound = "C::R: crate::AppDataResponse")
 )]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 pub struct ClientWriteResponse<C: RaftTypeConfig> {
     /// The id of the log that is applied.
     pub log_id: LogIdOf<C>,

@@ -63,6 +63,7 @@ pub type CheckIsLeaderError<C> = LinearizableReadError<C>;
 #[derive(Debug, Clone, thiserror::Error, derive_more::TryInto)]
 #[derive(PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 pub enum InstallSnapshotError {
     /// The snapshot segment offset does not match what was expected.
     #[error(transparent)]
@@ -73,6 +74,7 @@ pub enum InstallSnapshotError {
 #[derive(Debug, Clone, thiserror::Error, derive_more::TryInto)]
 #[derive(PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 pub enum ClientWriteError<C>
 where C: RaftTypeConfig
 {
@@ -99,6 +101,7 @@ where C: RaftTypeConfig
 /// The set of errors which may take place when requesting to propose a config change.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 pub enum ChangeMembershipError<C: RaftTypeConfig> {
     /// A membership change is already in progress.
     #[error(transparent)]
@@ -116,6 +119,7 @@ pub enum ChangeMembershipError<C: RaftTypeConfig> {
 /// The set of errors which may take place when initializing a pristine Raft node.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error, derive_more::TryInto)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 pub enum InitializeError<C>
 where C: RaftTypeConfig
 {
@@ -139,6 +143,7 @@ where C: RaftTypeConfig
     serde(bound(serialize = "E: serde::Serialize")),
     serde(bound(deserialize = "E: for <'d> serde::Deserialize<'d>"))
 )]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 pub enum RPCError<C: RaftTypeConfig, E: Error = Infallible> {
     /// The RPC request timed out.
     #[error(transparent)]
@@ -210,6 +215,7 @@ where C: RaftTypeConfig
 /// Error that occurred on a remote Raft peer.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 #[error("error occur on remote peer {target}: {source}")]
 pub struct RemoteError<C, T: Error>
 where C: RaftTypeConfig
@@ -263,6 +269,7 @@ where
 /// Unlike [`Unreachable`], which indicates an error that should backoff before retrying.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 #[error("NetworkError: {source}")]
 pub struct NetworkError<C: RaftTypeConfig> {
     source: C::ErrorSource,
@@ -296,6 +303,7 @@ impl<C: RaftTypeConfig> NetworkError<C> {
 /// [`backoff()`]: crate::network::RaftNetworkV2::backoff
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 #[error("Unreachable node: {source}")]
 pub struct Unreachable<C: RaftTypeConfig> {
     source: C::ErrorSource,
@@ -320,6 +328,7 @@ impl<C: RaftTypeConfig> Unreachable<C> {
 /// Error indicating that an RPC request timed out.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 #[error("timeout after {timeout:?} when {action} {id}->{target}")]
 pub struct Timeout<C: RaftTypeConfig> {
     /// The type of RPC that timed out.
@@ -335,6 +344,7 @@ pub struct Timeout<C: RaftTypeConfig> {
 /// Error indicating that the request should be forwarded to the leader.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 #[error("has to forward request to: {leader_id:?}, {leader_node:?}")]
 pub struct ForwardToLeader<C>
 where C: RaftTypeConfig
@@ -368,6 +378,7 @@ where C: RaftTypeConfig
 /// Error indicating a snapshot segment ID mismatch.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 #[error("snapshot segment id mismatch, expect: {expect}, got: {got}")]
 pub struct SnapshotMismatch {
     /// The expected snapshot segment ID.
@@ -379,6 +390,7 @@ pub struct SnapshotMismatch {
 /// Error indicating that not enough nodes responded to form a quorum.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 #[error("not enough for a quorum, cluster: {cluster}, got: {got:?}")]
 pub struct QuorumNotEnough<C: RaftTypeConfig> {
     /// A description of the cluster membership.
@@ -390,6 +402,7 @@ pub struct QuorumNotEnough<C: RaftTypeConfig> {
 /// Error indicating a membership change is already in progress.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 #[error(
     "the cluster is already undergoing a configuration change at log {membership_log_id:?}, last committed membership log id: {committed:?}"
 )]
@@ -403,6 +416,7 @@ pub struct InProgress<C: RaftTypeConfig> {
 /// Error indicating a learner node was not found in the cluster.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 #[error("Learner {node_id} not found: add it as learner before adding it as a voter")]
 pub struct LearnerNotFound<C: RaftTypeConfig> {
     /// The node ID of the learner that was not found.
@@ -412,6 +426,7 @@ pub struct LearnerNotFound<C: RaftTypeConfig> {
 /// Error indicating an operation is not allowed in the current state.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 #[error("not allowed to initialize due to current raft state: last_log_id: {last_log_id:?} vote: {vote}")]
 pub struct NotAllowed<C: RaftTypeConfig> {
     /// The last log ID in the current state.
@@ -423,6 +438,7 @@ pub struct NotAllowed<C: RaftTypeConfig> {
 /// Error indicating a node is not a member of the cluster.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 #[error("node {node_id} has to be a member. membership:{membership:?}")]
 pub struct NotInMembers<C>
 where C: RaftTypeConfig
@@ -436,6 +452,7 @@ where C: RaftTypeConfig
 /// Error indicating an empty membership configuration was provided.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 #[error("new membership cannot be empty")]
 pub struct EmptyMembership {}
 
@@ -450,3 +467,87 @@ pub enum Infallible {}
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[error("no-forward")]
 pub enum NoForward {}
+
+#[cfg(feature = "rkyv")]
+#[derive(rkyv::Portable)]
+#[repr(C)]
+pub struct ArchivedInfallible;
+
+#[cfg(feature = "rkyv")]
+impl rkyv::Archive for Infallible {
+    type Archived = ArchivedInfallible;
+    type Resolver = ();
+
+    fn resolve(&self, _resolver: Self::Resolver, _out: rkyv::Place<Self::Archived>) {
+        match *self {}
+    }
+}
+
+#[cfg(feature = "rkyv")]
+impl<S> rkyv::Serialize<S> for Infallible
+where S: rkyv::rancor::Fallible + ?Sized
+{
+    fn serialize(&self, _serializer: &mut S) -> Result<Self::Resolver, S::Error> {
+        match *self {}
+    }
+}
+
+#[cfg(feature = "rkyv")]
+impl<D> rkyv::Deserialize<Infallible, D> for ArchivedInfallible
+where D: rkyv::rancor::Fallible + ?Sized
+{
+    fn deserialize(&self, _deserializer: &mut D) -> Result<Infallible, D::Error> {
+        unreachable!("deserializing Infallible is impossible")
+    }
+}
+
+#[cfg(feature = "rkyv")]
+unsafe impl<C> rkyv::bytecheck::CheckBytes<C> for ArchivedInfallible
+where C: rkyv::rancor::Fallible + ?Sized
+{
+    unsafe fn check_bytes(_value: *const Self, _context: &mut C) -> Result<(), C::Error> {
+        Ok(())
+    }
+}
+
+#[cfg(feature = "rkyv")]
+#[derive(rkyv::Portable)]
+#[repr(C)]
+pub struct ArchivedNoForward;
+
+#[cfg(feature = "rkyv")]
+impl rkyv::Archive for NoForward {
+    type Archived = ArchivedNoForward;
+    type Resolver = ();
+
+    fn resolve(&self, _resolver: Self::Resolver, _out: rkyv::Place<Self::Archived>) {
+        match *self {}
+    }
+}
+
+#[cfg(feature = "rkyv")]
+impl<S> rkyv::Serialize<S> for NoForward
+where S: rkyv::rancor::Fallible + ?Sized
+{
+    fn serialize(&self, _serializer: &mut S) -> Result<Self::Resolver, S::Error> {
+        match *self {}
+    }
+}
+
+#[cfg(feature = "rkyv")]
+impl<D> rkyv::Deserialize<NoForward, D> for ArchivedNoForward
+where D: rkyv::rancor::Fallible + ?Sized
+{
+    fn deserialize(&self, _deserializer: &mut D) -> Result<NoForward, D::Error> {
+        unreachable!("deserializing NoForward is impossible")
+    }
+}
+
+#[cfg(feature = "rkyv")]
+unsafe impl<C> rkyv::bytecheck::CheckBytes<C> for ArchivedNoForward
+where C: rkyv::rancor::Fallible + ?Sized
+{
+    unsafe fn check_bytes(_value: *const Self, _context: &mut C) -> Result<(), C::Error> {
+        Ok(())
+    }
+}

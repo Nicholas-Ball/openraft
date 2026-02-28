@@ -9,6 +9,7 @@ use crate::type_config::alias::VoteOf;
 /// An RPC sent by candidates to gather votes (§5.2).
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 pub struct VoteRequest<C: RaftTypeConfig> {
     /// The candidate's vote requesting support.
     pub vote: VoteOf<C>,
@@ -36,6 +37,7 @@ where C: RaftTypeConfig
 /// The response to a `VoteRequest`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize), serde(bound = ""))]
+#[cfg_attr(feature = "rkyv", derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize))]
 pub struct VoteResponse<C: RaftTypeConfig> {
     /// vote after a node handling vote-request.
     /// Thus, `resp.vote >= req.vote` always holds.

@@ -1,0 +1,47 @@
+[package]
+name = "raft-kv-memstore-rkyv"
+version = "0.1.0"
+readme = "README.md"
+
+edition = "2024"
+authors = [
+    "drdr xp <drdr.xp@gmail.com>",
+    "Pedro Paulo de Amorim <pepa.amorim@gmail.com>",
+]
+categories = ["algorithms", "asynchronous", "data-structures"]
+description = "An example distributed key-value store built upon `openraft` with rkyv snapshots."
+homepage = "https://github.com/databendlabs/openraft"
+keywords = ["raft", "consensus"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/databendlabs/openraft"
+
+[[bin]]
+name = "raft-key-value-rkyv"
+path = "src/bin/main.rs"
+
+[dependencies]
+client-http        = { path = "../client-http" }
+log-mem            = { path = "../log-mem" }
+network-v1-http    = { path = "../network-v1-http" }
+sm-mem-rkyv        = { path = "../sm-mem-rkyv" }
+openraft           = { path = "../../openraft", features = ["serde", "rkyv", "type-alias"] }
+openraft-legacy    = { path = "../../legacy" }
+types-kv           = { path = "../types-kv" }
+
+actix-web          = { version = "4.0.0-rc.2" }
+clap               = { version = "4.1.11", features = ["derive", "env"] }
+futures            = { version = "0.3" }
+reqwest            = { version = "0.12.5", features = ["json"] }
+serde              = { version = "1.0.114", features = ["derive"] }
+serde_json         = { version = "1.0.57" }
+tracing            = { version = "0.1.29" }
+tracing-subscriber = { version = "0.3.0", features = ["env-filter"] }
+
+[dev-dependencies]
+anyhow = { version = "1.0.63" }
+maplit = { version = "1.0.2" }
+
+[features]
+
+[package.metadata.docs.rs]
+all-features = true
